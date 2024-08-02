@@ -7,15 +7,20 @@ export default function Home() {
   const { data: session } = useSession();
   const [docId, setDocId] = useState<string | null>(null);
 
-  console.log("Home component is rendering with session:", session);
+  const requestAdditionalPermissions = async () => {
+    // Redirect user to Google's OAuth 2.0 consent screen to request additional permissions
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${process.env.NEXTAUTH_URL}/api/auth/callback/google&response_type=code&scope=https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/documents&access_type=offline&prompt=consent`;
+  };
 
   const createGoogleDoc = async () => {
     const res = await fetch("/api/google-docs", {
       method: "POST",
     });
     const data = await res.json();
-    if (data.id) {
-      setDocId(data.id);
+    if (data.documentId) {
+      setDocId(data.documentId);
+    } else {
+      alert("Failed to create Google Doc. Please try again.");
     }
   };
 
@@ -25,10 +30,12 @@ export default function Home() {
         <>
           <p>Welcome, {session.user?.name}</p>
           <button onClick={() => signOut()}>Sign out</button>
-          <button onClick={createGoogleDoc}>Create Google Doc</button>
+          <button onClick={requestAdditionalPermissions}>
+            Create Google Doc (Request Additional Permissions)
+          </button>
           {docId && (
             <p>
-              Document created! <a href={`https://docs.google.com/document/d/${docId}`}>Open Document</a>
+              Document created! <a href={`https://docs.google.com/document/d/${docId}/edit`}>Open Document</a>
             </p>
           )}
         </>
@@ -41,5 +48,3 @@ export default function Home() {
     </div>
   );
 }
-
-
