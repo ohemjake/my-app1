@@ -21,11 +21,15 @@ export async function POST(req: NextRequest) {
         title: "New Document",
       },
     });
-    return NextResponse.json(response.data, { status: 200 });
+    return NextResponse.json({ documentId: response.data.documentId }, { status: 200 });
   } catch (error) {
-    console.error("Error creating Google Doc:", (error as Error).message);
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+    if (error instanceof Error) {
+      console.error("Error creating Google Doc:", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    } else {
+      console.error("Unexpected error creating Google Doc:", error);
+      return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
+    }
   }
 }
-
 
