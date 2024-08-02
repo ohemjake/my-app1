@@ -7,20 +7,32 @@ export default function Home() {
   const { data: session } = useSession();
   const [docId, setDocId] = useState<string | null>(null);
 
-  const requestAdditionalPermissions = async () => {
-    // Redirect user to Google's OAuth 2.0 consent screen to request additional permissions
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${process.env.NEXTAUTH_URL}/api/auth/callback/google&response_type=code&scope=https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/documents&access_type=offline&prompt=consent`;
+  console.log("Home component is rendering with session:", session);
+
+  const requestAdditionalPermissions = () => {
+    window.location.href = `/api/auth/signin/google?scope=openid email profile https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/documents`;
   };
 
   const createGoogleDoc = async () => {
-    const res = await fetch("/api/google-docs", {
-      method: "POST",
-    });
-    const data = await res.json();
-    if (data.documentId) {
-      setDocId(data.documentId);
-    } else {
-      alert("Failed to create Google Doc. Please try again.");
+    try {
+      const res = await fetch("/api/google-docs", {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Error response from server:", errorData);
+        if (errorData.error === "Unauthorized") {
+          console.log("User needs to grant additional permissions.");
+          requestAdditionalPermissions();
+        } else {
+          throw new Error(errorData.error || "Failed to create Google Doc");
+        }
+      } else {
+        const data = await res.json();
+        setDocId(data.documentId);
+      }
+    } catch (error) {
+      console.error("Error creating Google Doc:", (error as Error).message);
     }
   };
 
@@ -30,12 +42,11 @@ export default function Home() {
         <>
           <p>Welcome, {session.user?.name}</p>
           <button onClick={() => signOut()}>Sign out</button>
-          <button onClick={requestAdditionalPermissions}>
-            Create Google Doc (Request Additional Permissions)
-          </button>
+          <button onClick={requestAdditionalPermissions}>Grant Google Docs Permission</button>
+          <button onClick={createGoogleDoc}>Create Google Doc</button>
           {docId && (
             <p>
-              Document created! <a href={`https://docs.google.com/document/d/${docId}/edit`}>Open Document</a>
+              Document created! <a href={`https://docs.google.com/document/d/${docId}`} target="_blank">Open Document</a>
             </p>
           )}
         </>
