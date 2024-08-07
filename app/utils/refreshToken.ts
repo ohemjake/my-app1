@@ -1,11 +1,10 @@
-// app/utils/refreshToken.js
 import { google } from 'googleapis';
 
-export async function refreshAccessToken(refreshToken) {
+export async function refreshAccessToken(refreshToken: string) {
   const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.NEXTAUTH_URL
+    process.env.GOOGLE_CLIENT_ID as string,
+    process.env.GOOGLE_CLIENT_SECRET as string,
+    process.env.NEXTAUTH_URL as string
   );
 
   oauth2Client.setCredentials({ refresh_token: refreshToken });
@@ -18,3 +17,9 @@ export async function refreshAccessToken(refreshToken) {
     throw error;
   }
 }
+
+
+
+
+
+
