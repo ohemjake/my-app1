@@ -3,6 +3,9 @@
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { useState } from 'react';
 
+import { GoogleDocReq } from './api/google-docs';
+import { RevokePermissions } from './api/revoke-permissions';
+
 export default function Home() {
   const { data: session } = useSession();
   const [docId, setDocId] = useState<string | null>(null);
@@ -14,27 +17,31 @@ export default function Home() {
 
   const createGoogleDoc = async () => {
     const currentSession = await getSession();
+    console.log('SESS:', currentSession);
     if (!currentSession) {
       requestAdditionalPermissions();
       return;
     }
 
     try {
-      const res = await fetch('/api/google-docs', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${currentSession.accessToken}`,
-        },
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
+      // const res = await fetch('/api/google-docs', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Authorization': `Bearer ${currentSession.accessToken}`,
+      //   },
+      // });
+      const res = await GoogleDocReq(currentSession.accessToken)
+      console.log('> GoogleDocuRequest >>>',res);
+
+      if (!(res.status = 200)) {
+        const errorData = res; //await res.json();
         if (errorData.error === 'Unauthorized' || errorData.error === 'invalid_token' || errorData.error === 'insufficient_scope') {
           requestAdditionalPermissions();
         } else {
           throw new Error(errorData.error || "Failed to create Google Doc");
         }
       } else {
-        const data = await res.json();
+        const data = res.result; //await res.json();
         setDocId(data.documentId);
         setMessage("Google Doc created successfully.");
       }
@@ -45,17 +52,21 @@ export default function Home() {
 
   const revokePermissions = async () => {
     try {
-      const res = await fetch('/api/revoke-permissions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session?.accessToken}`,
-        },
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
+      // const res = await fetch('/api/revoke-permissions', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Authorization': `Bearer ${session?.accessToken}`,
+      //   },
+      // });
+
+      const res = await RevokePermissions(session?.accessToken)
+      console.log('> RevokePermissions >>>',res);
+
+      if (!(res.status = 200)) {
+        const errorData = res; //await res.json();
         throw new Error(errorData.error || "Failed to revoke permissions");
       } else {
-        const data = await res.json();
+        const data = res; //await res.json();
         setMessage("Permissions revoked successfully.");
         setDocId(null);
       }
