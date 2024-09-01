@@ -1,16 +1,18 @@
 'use server';
 
 export async function GoogleDocReq(req) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
-  if ( !session?.accessToken) {
+  if (!session?.accessToken) {
     return { error: 'Unauthorized', status: 401 };
   }
 
   let accessToken = session?.accessToken;
   const refreshToken = session?.refreshToken;
-console.log("accessToken: ",accessToken)
-console.log("refreshToken: ",refreshToken)
+  
+  console.log("accessToken: ", accessToken)
+  console.log("refreshToken: ", refreshToken)
+
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
 
@@ -22,7 +24,7 @@ console.log("refreshToken: ",refreshToken)
         title: 'New Document',
       },
     });
-    return { result:response.data, status: 200 };
+    return { result: response.data, status: 200 };
   } catch (error) {
     if ((error.code === 401 || error.code === 403) && refreshToken) {
       try {
@@ -35,10 +37,10 @@ console.log("refreshToken: ",refreshToken)
             title: 'New Document',
           },
         });
-        console.log('200 yey');
-        return { result:response.data, status: 200 };
+        console.log('200 OK');
+        return { result: response.data, status: 200 };
       } catch (refreshError) {
-        console.log('500 aww', refreshError);
+        console.log('500 Fail', refreshError);
         return { error: 'Failed to refresh access token', status: 500 };
       }
     }

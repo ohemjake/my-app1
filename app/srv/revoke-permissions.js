@@ -1,9 +1,9 @@
 'use server';
 
 export async function RevokePermissions(req) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
-  if ( !session?.accessToken) {
+  if (!session?.accessToken) {
     return { error: 'Unauthorized', status: 401 };
   }
 

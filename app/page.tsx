@@ -3,8 +3,8 @@
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { useState } from 'react';
 
-import { GoogleDocReq } from './api/google-docs';
-import { RevokePermissions } from './api/revoke-permissions';
+import { GoogleDocReq } from './srv/google-docs';
+import { RevokePermissions } from './srv/revoke-permissions';
 
 export default function Home() {
   const { data: session } = useSession();

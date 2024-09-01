@@ -1,42 +1,26 @@
-"use client";
+import { getSession } from "next-auth/react";
+import { redirect } from 'next/navigation';
+import { GoogleDocReq } from '../srv/google-docs';
 
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
-import { useRouter } from 'next/navigation';
+export default async function CreateDoc() {
+  const session = await getSession();
 
-export default function CreateDoc() {
-  const { data: session } = useSession();
-  const [docId, setDocId] = useState<string | null>(null);
-  const router = useRouter();
+  if (!session) {
+    redirect('/'); // Redirect if session is missing
+    return null;
+  }
 
-  useEffect(() => {
-    if (session) {
-      const createGoogleDoc = async () => {
-        const res = await fetch("/api/google-docs", {
-          method: "POST",
-        });
-        const data = await res.json();
-        if (data.id) {
-          setDocId(data.id);
-        } else {
-          router.push("/"); // Redirect if document creation fails
-        }
-      };
-      createGoogleDoc();
-    } else {
-      router.push("/"); // Redirect if session is missing
-    }
-  }, [session, router]);
+  const data = await GoogleDocReq(session.accessToken);
+  if (!data.result.id) {
+    redirect('/'); // Redirect if document creation fails
+    return null;
+  }
 
   return (
     <div>
-      {docId ? (
-        <p>
-          Document created! <a href={`https://docs.google.com/document/d/${docId}`}>Open Document</a>
-        </p>
-      ) : (
-        <p>Creating Google Doc...</p>
-      )}
+      <p>
+        Document created! <a href={`https://docs.google.com/document/d/${data.result.id}`}>Open Document</a>
+      </p>
     </div>
   );
 }
