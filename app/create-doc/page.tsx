@@ -10,8 +10,8 @@ export default async function CreateDoc() {
     return null;
   }
 
-  const data = await GoogleDocReq(session.accessToken);
-  if (!data.result.id) {
+  const data = await GoogleDocReq();
+  if (!data?.result?.documentId) {
     redirect('/'); // Redirect if document creation fails
     return null;
   }
@@ -19,7 +19,7 @@ export default async function CreateDoc() {
   return (
     <div>
       <p>
-        Document created! <a href={`https://docs.google.com/document/d/${data.result.id}`}>Open Document</a>
+        Document created! <a href={`https://docs.google.com/document/d/${data.result.documentId}`}>Open Document</a>
       </p>
     </div>
   );

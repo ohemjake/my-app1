@@ -1,7 +1,11 @@
 'use server';
 
-export async function RevokePermissions(req) {
-  const session = await auth();
+import { getServerSession } from "next-auth";
+import { authOptions } from "../api/auth/[...nextauth]/route";
+import { google } from 'googleapis';
+
+export async function RevokePermissions() {
+  const session = await getServerSession(authOptions);
 
   if (!session?.accessToken) {
     return { error: 'Unauthorized', status: 401 };

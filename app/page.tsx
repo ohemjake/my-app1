@@ -30,7 +30,7 @@ export default function Home() {
       //     'Authorization': `Bearer ${currentSession.accessToken}`,
       //   },
       // });
-      const res = await GoogleDocReq(currentSession.accessToken)
+      const res = await GoogleDocReq()
       console.log('> GoogleDocuRequest >>>',res);
 
       if (!(res.status = 200)) {
@@ -41,9 +41,10 @@ export default function Home() {
           throw new Error(errorData.error || "Failed to create Google Doc");
         }
       } else {
-        const data = res.result; //await res.json();
-        setDocId(data.documentId);
-        setMessage("Google Doc created successfully.");
+        const data = await res.result; //await res.json();
+        console.log("Google Doc:", data);
+        setDocId(data?.documentId ?? null);
+        setMessage((data?.documentId) ? "Google Doc created successfully." : "Failed to create document...");
       }
     } catch (error) {
       setMessage("Error creating Google Doc: " + (error as Error).message);
@@ -59,7 +60,7 @@ export default function Home() {
       //   },
       // });
 
-      const res = await RevokePermissions(session?.accessToken)
+      const res = await RevokePermissions()
       console.log('> RevokePermissions >>>',res);
 
       if (!(res.status = 200)) {
