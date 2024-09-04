@@ -3,8 +3,8 @@
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { useState } from 'react';
 
-import { GoogleDocReq } from './srv/google-docs';
-import { RevokePermissions } from './srv/revoke-permissions';
+import { GoogleDocReq } from './srv/google-docs-sa';
+import { RevokePermissions } from './srv/revoke-permissions-sa';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -33,15 +33,15 @@ export default function Home() {
       const res = await GoogleDocReq()
       console.log('> GoogleDocuRequest >>>',res);
 
-      if (!(res.status = 200)) {
-        const errorData = res; //await res.json();
+      if (!res.success) {
+        const errorData = res.data; //await res.json();
         if (errorData.error === 'Unauthorized' || errorData.error === 'invalid_token' || errorData.error === 'insufficient_scope') {
           requestAdditionalPermissions();
         } else {
           throw new Error(errorData.error || "Failed to create Google Doc");
         }
       } else {
-        const data = await res.result; //await res.json();
+        const data = await res.data; //await res.json();
         console.log("Google Doc:", data);
         setDocId(data?.documentId ?? null);
         setMessage((data?.documentId) ? "Google Doc created successfully." : "Failed to create document...");
@@ -63,12 +63,12 @@ export default function Home() {
       const res = await RevokePermissions()
       console.log('> RevokePermissions >>>',res);
 
-      if (!(res.status = 200)) {
+      if (!res.success) {
         const errorData = res; //await res.json();
-        throw new Error(errorData.error || "Failed to revoke permissions");
+        throw new Error(errorData.message || "Failed to revoke permissions");
       } else {
         const data = res; //await res.json();
-        setMessage("Permissions revoked successfully.");
+        setMessage(data?.message ?? null);
         setDocId(null);
       }
     } catch (error) {
