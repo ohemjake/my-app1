@@ -1,6 +1,11 @@
 <<<<<<< HEAD
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
 
+##On Google Cloud console, make sure Google Docs API is enabled.
+
+To enable, Go to https://console.cloud.google.com/apis > Library > search Google Docs API
+Go to the api and make sure its enabled.
+
 ## Getting Started
 
 First, run the development server:
